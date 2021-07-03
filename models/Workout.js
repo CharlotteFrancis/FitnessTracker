@@ -1,10 +1,16 @@
 const { model, Schema } = require('mongoose')
 
 const Workout = new Schema({
-  day: String,
+  day: Date,
   exercises: [{
-    type: Schema.Types.ObjectId,
-    ref: 'Exercise'
+    type: {
+      type: String
+    },
+    name: String,
+    duration: Number,
+    weight: Number,
+    reps: Number,
+    sets: Number
   }]
 })
 

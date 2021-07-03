@@ -1,23 +1,24 @@
 const router = require('express').Router()
-const { Workout, Exercise } = require('../models')
+const { Workout } = require('../models')
 
 // get all workouts
 router.get('/workouts', (req, res) => {
-  Workout.find()
-    .populate('exercises')
+  Workout.aggregate([
+    {
+      $addFields: {
+        totalDuration: {
+          $sum: '$exercises.duration'
+        }
+      }
+    }
+  ])
     .then(workouts => res.json(workouts))
     .catch(err => console.log('error in get all workouts:', err))
 })
 
 // get add an exercise(?)
 router.put('/workouts/:id', (req, res) => {
-  Exercise.create(req.body)
-    .then(exercise => {
-      Workout.findByIdAndUpdate(exercise.workout, { $push: { exercises: exercise._id } })
-        .then(_ => res.json(exercise))
-        .catch(err => console.log('error in making  the update route for workout', err))
-    })
-    .catch(err => console.log('error in making the exercise, in workout routes: ', err))
+  Workout.findByIdAndUpdate(req.params.id, { $push: { exercises: req.body } })
 })
 
 // create a workout
@@ -29,7 +30,17 @@ router.post('/workouts', (req, res) => {
 
 // get workouts in range
 router.get('/workouts/range', (req, res) => {
-  // not sure this haha
+  Workout.aggregate([
+    {
+      $addFields: {
+        totalDuration: {
+          $sum: '$exercises.duration'
+        }
+      }
+    }
+  ])
+    .then(workouts => res.json(workouts))
+    .catch(err => console.log(err))
 })
 
 // delete a workout
