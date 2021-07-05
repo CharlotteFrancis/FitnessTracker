@@ -19,11 +19,20 @@ router.get('/workouts', (req, res) => {
 // get add an exercise(?)
 router.put('/workouts/:id', (req, res) => {
   Workout.findByIdAndUpdate(req.params.id, { $push: { exercises: req.body } })
+    .then(_ => {
+      console.log(req.body)
+      res.sendStatus(200)
+    })
+    .catch(err => console.log(err))
 })
 
 // create a workout
 router.post('/workouts', (req, res) => {
-  Workout.create(req.body)
+  const newWorkout = {
+    ...req.body,
+    day: new Date(new Date().setDate(new Date().getDate()))
+  }
+  Workout.create(newWorkout)
     .then(workout => res.json(workout))
     .catch(err => console.log('Error in posting workout: ', err))
 })
@@ -39,7 +48,15 @@ router.get('/workouts/range', (req, res) => {
       }
     }
   ])
-    .then(workouts => res.json(workouts))
+    .then(workouts => {
+      const sevenDayWorkout = []
+      if (workouts.length > 7) {
+        for (let i = 0; i < 7; i++) {
+          sevenDayWorkout.push(workouts[i + workouts.length - 7])
+        }
+      }
+      res.json(sevenDayWorkout)
+    })
     .catch(err => console.log(err))
 })
 
